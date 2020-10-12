@@ -1,10 +1,5 @@
 # ubuntu:latest at 2019-02-12T19:22:56IST
-FROM php:7.2-cli
-
-LABEL "com.github.actions.icon"="code"
-LABEL "com.github.actions.color"="purple"
-LABEL "com.github.actions.name"="PHPCS Code Review"
-LABEL "com.github.actions.description"="This will run phpcs on PRs"
+FROM php:7.4-cli
 
 RUN echo "tzdata tzdata/Areas select America" | debconf-set-selections && \
 echo "tzdata tzdata/Zones/Asia select New_York" | debconf-set-selections
@@ -19,6 +14,8 @@ RUN set -eux; \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng-dev \
+    libmagickwand-dev \
+    libzip-dev \
     rsync \
     sudo \
     tree \
@@ -26,12 +23,14 @@ RUN set -eux; \
     unzip \
     wget ; \
     rm -rf /var/lib/apt/lists/*; \
+    pecl install imagick; \
     # verify that the binary works
     gosu nobody true \
     && docker-php-ext-install -j$(nproc) iconv \
-    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
     && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install -j$(nproc) zip
+    && docker-php-ext-install -j$(nproc) zip \
+    && docker-php-ext-enable imagick
 
 RUN useradd -m -s /bin/bash tr1b0t
 
